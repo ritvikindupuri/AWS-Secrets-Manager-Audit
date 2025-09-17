@@ -1,0 +1,67 @@
+#This file defines your entire sandboxed test environment as code (IaC). 
+#Anyone can use this template to instantly deploy the same vulnerable setup that I audited
+
+# AWS CloudFormation template to create a sandboxed environment for
+# auditing AWS Secrets Manager.
+# This template creates two secrets and an overprivileged IAM role.
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Sets up a vulnerable AWS Secrets Manager environment with two secrets and an overprivileged IAM role for security auditing.'
+
+Resources:
+  # --- IAM Role with Overly Permissive Policy ---
+  OverprivilegedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: SecretsManager-Overprivileged-Role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com # Assumable by an EC2 instance
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: SecretsManager-Full-Access-Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'secretsmanager:*' # Overly broad permission
+                  - 'iam:ListPolicies'
+                  - 'iam:GetPolicy'
+                Resource: '*' # Access to ALL resources
+
+  # --- Secrets to be Audited ---
+  APIKeySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: 'prod/api-key'
+      Description: 'Secret containing a production API key.'
+      SecretString: '{"api_key": "123-abc-789-xyz"}'
+      Tags:
+        - Key: Environment
+          Value: Production
+
+  DatabasePasswordSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: 'db/master-password'
+      Description: 'Secret containing a master database password.'
+      GenerateSecretString:
+        PasswordLength: 16
+        ExcludePunctuation: false
+      Tags:
+        - Key: Environment
+          Value: Staging
+
+Outputs:
+  OverprivilegedRoleArn:
+    Description: "ARN of the overprivileged IAM role"
+    Value: !GetAtt OverprivilegedRole.Arn
+  APIKeySecretArn:
+    Description: "ARN of the API key secret"
+    Value: !Ref APIKeySecret
+  DatabasePasswordSecretArn:
+    Description: "ARN of the database password secret"
+    Value: !Ref DatabasePasswordSecret
