@@ -1,0 +1,8 @@
+# This project relies on the following command-line tools.
+# Please ensure they are installed and configured on your system.
+
+# AWS Command Line Interface (CLI)
+aws-cli
+
+# A lightweight and flexible command-line JSON processor.
+jq
