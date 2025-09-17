@@ -29,29 +29,31 @@ The audit followed a systematic approach: initial enumeration, deep inspection o
 
 ### Figure 2 – Initial Secret Enumeration (`list-secrets`)
 *The first step involved using the `list-secrets` command to discover all secrets stored within the target region. This provides a high-level overview of available secrets and their metadata, forming the basis for further investigation.*
-<br>
-<img src="image_4f894c.png" width="800" alt="Listing secrets with AWS CLI">
 
-<br>
+
+<img width="800" height="416" alt="image" src="https://github.com/user-attachments/assets/26f24d33-99e8-42a9-8f42-1f995c0f769c" />
+
 
 ### Figure 3 – Extracting Secret Metadata (`describe-secret`)
 *With a list of secret ARNs, the `describe-secret` command was used to retrieve detailed metadata for a specific secret. This revealed its description, tags, and the ARN of the associated AWS KMS key used for encryption, which are crucial details for an attacker.*
 <br>
-<img src="image_4f896a.png" width="800" alt="Describing a specific secret">
+
+<img width="800" height="345" alt="image" src="https://github.com/user-attachments/assets/335c2a8d-7a5c-4996-af53-84b0972c7413" />
+
 
 <br>
 
 ### Figure 4 – Inspecting Version History & Resource Policies
 *To understand the secret's lifecycle and access controls, `list-secret-version-ids` and `get-resource-policy` were executed. These commands expose the history of secret versions (potential for accessing old, leaked credentials) and any resource-based policies that might grant unintended cross-account access.*
-<br>
-<img src="image_4f8950.png" width="800" alt="Listing secret versions and getting resource policy">
 
-<br>
+<img width="800" height="295" alt="image" src="https://github.com/user-attachments/assets/5bd42c5e-d097-44dc-8ed8-70fc99a38dc4" />
 
 ### Figure 5 – Analyzing an Overly Permissive IAM Policy
 *The core of the audit involved analyzing the IAM policies governing access to Secrets Manager. This example shows a policy granting broad permissions (`secretsmanager:*` and `iam:Get*`) which represents a critical misconfiguration. Such policies violate the **principle of least privilege** and allow an entity to not only read secrets but also modify permissions, creating a significant security risk.*
-<br>
-<img src="image_4f8932.png" width="800" alt="Analyzing an overly permissive IAM policy">
+
+<img width="800" height="402" alt="image" src="https://github.com/user-attachments/assets/58ef44ab-f40e-4f2a-8510-6ead7eb4dbb0" />
+
+
 
 ---
 
